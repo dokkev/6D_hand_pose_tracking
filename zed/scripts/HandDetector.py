@@ -18,18 +18,20 @@ class HandTracking():
         self.mp_draw = mp.solutions.drawing_utils
         self.mp_styles = mp.solutions.drawing_styles
         self.time1 = time.time()
+        self.wrist = []
 
     def findHands(self, img):
       
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # flip the image horizontally for a selfie-view display.
-        img = cv2.flip(img, 1)
+        # img = cv2.flip(img, 1)
         self.results = self.hands.process(img)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
 
 
         if self.results.multi_hand_landmarks:
+            # print(self.results.multi_handedness)
             for hand_landmarks in self.results.multi_hand_landmarks:
                 self.mp_draw.draw_landmarks(
                     img, 
@@ -42,20 +44,61 @@ class HandTracking():
 
     def findPosition(self):
         data = []
-        # print(self.results.multi_handedness)
-        if self.results.multi_hand_landmarks:
+       
+        # if self.results.multi_hand_landmarks:
             # print(self.results.multi_hand_landmarks)
+            # for hand_landmarks in self.results.multi_hand_landmarks:
+            #     for id, lm in enumerate(hand_landmarks.landmark):
+   
+            # # for hand_world_landmarks in self.results.multi_hand_world_landmarks:
+            # #     for id, lm in enumerate(hand_world_landmarks.landmark):
+            # #         data.append([lm.x, lm.y, lm.z])
+
+        
+        # return data
+    
+    def find3Dpostion(self, depth_img, pcl,camera_params):
+        fx = camera_params.fx  # Focal length in pixels (x-axis)
+        fy = camera_params.fy  # Focal length in pixels (y-axis)
+        cx = camera_params.cx  # X-coordinate of the principal point
+        cy = camera_params.cy  # Y-coordinate of the principal point
+
+
+        data = []
+        if self.results.multi_hand_landmarks:
             for hand_landmarks in self.results.multi_hand_landmarks:
                 for id, lm in enumerate(hand_landmarks.landmark):
-                    data.append([lm.x, lm.y, lm.z])
-            # for hand_world_landmarks in self.results.multi_hand_world_landmarks:
-            #     for id, lm in enumerate(hand_world_landmarks.landmark):
-            #         data.append([lm.x, lm.y, lm.z])
+                    if id == 0:
+                        # Find the pixel coordinates of the wrist
+                        h, w, c = depth_img.shape
+                        cx, cy = int(lm.x * w), int(lm.y * h)
+                        try:
+                            err, point_cloud_value = pcl.get_value(cx, cy)
+                            x = point_cloud_value[0]
+                            y = point_cloud_value[1]
+                            z = point_cloud_value[2]
+                            self.wrist = [x, y, z]
+                            # print("Wrist: ", self.wrist)
+                            # Mark on depth image
+                            cv2.circle(depth_img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
 
+                          
+                            print("cx: ",)
+                            print("x: ",lm)
+                        except Exception:
+                            print("Error: ", Exception)
+                            pass
+      
+
+        # Convert the data to a numpy array
         data = np.array(data)
-        return data
-            
 
+
+
+
+
+            
+                    
     
     def displayFPS(self, cap, img):
         # Set the time for this frame to the current time.
@@ -87,52 +130,9 @@ class HandTracking():
      
             edges = [(1,2),(2,3),(3,4),(0,5),(5,6),(5,9),(1,0),(6,7),(7,8),(0,9),(9,10),(10,11),(11,12),(9,13),(13,14),(14,15),(15,16),(13,17),(17,18),(18,19),(19,20),(0,17)]
 
-            for edge in edges:
-                ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
+            # for edge in edges:
+                # ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
       
             # Draw the plot
             plt.draw()
             plt.pause(0.0001)
-    
-def main():
-    cap = cv2.VideoCapture(0)
-    # cap.set(3,1280)
-    # cap.set(4,960)
-
-    detector = HandTracking()
-    plot = True
-
-    # Create 3D plot
-    if plot == True:
-        fig = plt.figure()
-        plt.ion()
-        ax = fig.add_subplot(111, projection='3d')
-
-    while cap.isOpened():
-        success, img = cap.read()
-        if not success:
-            print("Error: No Camera Found")
-            break
-
-        img = detector.findHands(img)
-        data = detector.findPosition()
-
-        if plot == True:
-            detector.plot(ax,plt,data)
-
-
-        img = detector.displayFPS(cap,img)
-        cv2.imshow("MediaPipe Hands", img)
-        cv2.waitKey(1)
-
-if __name__ == "__main__":
-    # todo: add launchmode
-    if not sys.argv:
-        print("Launchmode: Default")
-        print("3D Plot is enabled")
-   
-    
-    main()
-    
-
-
