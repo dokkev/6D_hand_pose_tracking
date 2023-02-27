@@ -21,12 +21,13 @@ class Zed():
         # Initialize the ZED camera
         self.zed = sl.Camera()
         self.init_params = sl.InitParameters(input_t=self.input_type)
-        self.init_params.camera_resolution = sl.RESOLUTION.HD1080
+        self.init_params.camera_resolution = sl.RESOLUTION.HD720
         self.init_params.camera_fps = 30
         self.init_params.depth_mode = sl.DEPTH_MODE.ULTRA
         self.init_params.coordinate_units = sl.UNIT.METER
         self.init_params.depth_minimum_distance = 0.3
         self.init_params.depth_maximum_distance = 40
+
 
  
         # Open the camera
@@ -53,9 +54,10 @@ class Zed():
         
 
 
-        # declare image, depth, nd point cloud
+        # declare image, depth, point cloud
         self.image = sl.Mat()
         self.depth = sl.Mat()
+        self.Z_depth = sl.Mat()
         self.point_cloud = sl.Mat()
 
     def print_information(self):

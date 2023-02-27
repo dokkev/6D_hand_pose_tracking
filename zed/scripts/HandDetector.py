@@ -67,31 +67,38 @@ class HandTracking():
         data = []
         if self.results.multi_hand_landmarks:
             for hand_landmarks in self.results.multi_hand_landmarks:
+                x = []
+                y = []
+                z = []
                 for id, lm in enumerate(hand_landmarks.landmark):
-                    if id == 0:
-                        # Find the pixel coordinates of the wrist
-                        h, w, c = depth_img.shape
-                        cx, cy = int(lm.x * w), int(lm.y * h)
-                        try:
-                            err, point_cloud_value = pcl.get_value(cx, cy)
-                            x = point_cloud_value[0]
-                            y = point_cloud_value[1]
-                            z = point_cloud_value[2]
-                            self.wrist = [x, y, z]
-                            # print("Wrist: ", self.wrist)
-                            # Mark on depth image
-                            cv2.circle(depth_img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
+                    # Find the pixel coordinates of the wrist
+                    h, w, c= depth_img.shape
+                    cx, cy = int(lm.x * w), int(lm.y * h)
+                    
 
-                          
-                            print("cx: ",)
-                            print("x: ",lm)
-                        except Exception:
-                            print("Error: ", Exception)
-                            pass
-      
+
+
+                    try:
+                        err, point_cloud_value = pcl.get_value(cx, cy)
+             
+           
+    
+                        # print("Wrist: ", self.wrist)
+                        # Mark on depth image
+                        cv2.circle(depth_img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
+                        data.append([point_cloud_value[0], point_cloud_value[1], point_cloud_value[2]])
+                        
+              
+                    except Exception:
+                        print("Error: ", Exception)
+                        pass
+    
 
         # Convert the data to a numpy array
         data = np.array(data)
+        print(data.shape)
+
+        return data
 
 
 

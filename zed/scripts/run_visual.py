@@ -25,7 +25,7 @@ def main():
 
     # 3d plot
     # Create 3D plot
-    plot = False
+    plot = True
     if plot == True:
         fig = plt.figure()
         plt.ion()
@@ -48,7 +48,7 @@ def main():
             # find hands
             img = detector.findHands(img)
             # find position
-            data = detector.find4Dpostion(depth_img, pcl,camera_params)
+            data = detector.find3Dpostion(depth_img, pcl,camera_params)
 
 
             # half size images
