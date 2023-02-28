@@ -6,7 +6,7 @@ import pyzed.sl as sl
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from HandDetector import HandTracking
+from MpHand import HandTracking
 from Zed import Zed
 
 
@@ -48,7 +48,7 @@ def main():
             # find hands
             img = detector.findHands(img)
             # find position
-            data = detector.find3Dpostion(depth_img, pcl,camera_params)
+            data = detector.findpostion(depth_img, pcl,camera_params)
 
 
             # half size images

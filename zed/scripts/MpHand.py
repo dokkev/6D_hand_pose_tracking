@@ -42,22 +42,8 @@ class HandTracking():
                 )        
         return img
 
-    def findPosition(self):
-        data = []
-       
-        # if self.results.multi_hand_landmarks:
-            # print(self.results.multi_hand_landmarks)
-            # for hand_landmarks in self.results.multi_hand_landmarks:
-            #     for id, lm in enumerate(hand_landmarks.landmark):
-   
-            # # for hand_world_landmarks in self.results.multi_hand_world_landmarks:
-            # #     for id, lm in enumerate(hand_world_landmarks.landmark):
-            # #         data.append([lm.x, lm.y, lm.z])
-
-        
-        # return data
     
-    def find3Dpostion(self, depth_img, pcl,camera_params):
+    def findpostion(self, img, pcl,camera_params):
         fx = camera_params.fx  # Focal length in pixels (x-axis)
         fy = camera_params.fy  # Focal length in pixels (y-axis)
         cx = camera_params.cx  # X-coordinate of the principal point
@@ -66,34 +52,37 @@ class HandTracking():
 
         data = []
         if self.results.multi_hand_landmarks:
-            for hand_landmarks in self.results.multi_hand_landmarks:
-                x = []
-                y = []
-                z = []
-                for id, lm in enumerate(hand_landmarks.landmark):
+             for landmarks in self.results.multi_hand_landmarks:
+                for id, landmark in enumerate(landmarks.landmark):
                     # Find the pixel coordinates of the wrist
-                    h, w, c= depth_img.shape
-                    cx, cy = int(lm.x * w), int(lm.y * h)
-                    
+                    if id == 0:
+                        h, w, _ = img.shape
+                        cx, cy = int(landmark.x * w), int(landmark.y * h)
+
+                        # circle cx, cy
+                        cv2.circle(img, (cx, cy), 10, (0, 0, 255), -1)
+
+                        # Use ZED point cloud to estimate 3D position of wrist
+                        try:
+                            err, point_cloud_value = pcl.get_value(cx, cy)
+                            wrist_position = [point_cloud_value[0], point_cloud_value[1], point_cloud_value[2]]
+                        except:
+                            continue
+
+                        # Use wrist position as starting point to project 2D landmarks into 3D space
+                        for id, lm in enumerate(landmarks.landmark):
+                
+                            print(wrist_position[0], (lm.x - landmark.x), wrist_position[2])
+                            x_3d = wrist_position[0] + (lm.x - landmark.x) * wrist_position[2]
+                            
+                            y_3d = wrist_position[1] + (lm.y - landmark.y) * wrist_position[2]
+                            z_3d = wrist_position[2]
+                            hand_landmarks_3d = [x_3d, y_3d, z_3d]
+                
+                            data.append(hand_landmarks_3d)
 
 
-
-                    try:
-                        err, point_cloud_value = pcl.get_value(cx, cy)
-             
-           
     
-                        # print("Wrist: ", self.wrist)
-                        # Mark on depth image
-                        cv2.circle(depth_img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
-                        data.append([point_cloud_value[0], point_cloud_value[1], point_cloud_value[2]])
-                        
-              
-                    except Exception:
-                        print("Error: ", Exception)
-                        pass
-    
-
         # Convert the data to a numpy array
         data = np.array(data)
         print(data.shape)
@@ -137,8 +126,8 @@ class HandTracking():
      
             edges = [(1,2),(2,3),(3,4),(0,5),(5,6),(5,9),(1,0),(6,7),(7,8),(0,9),(9,10),(10,11),(11,12),(9,13),(13,14),(14,15),(15,16),(13,17),(17,18),(18,19),(19,20),(0,17)]
 
-            # for edge in edges:
-                # ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
+            for edge in edges:
+                ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
       
             # Draw the plot
             plt.draw()
