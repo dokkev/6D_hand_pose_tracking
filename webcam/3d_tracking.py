@@ -96,8 +96,8 @@ class HandTracking():
     
 def main():
     cap = cv2.VideoCapture(0)
-    # cap.set(3,1280)
-    # cap.set(4,960)
+    cap.set(3,1280)
+    cap.set(4,960)
 
     detector = HandTracking()
     plot = True

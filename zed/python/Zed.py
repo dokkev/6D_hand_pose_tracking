@@ -21,7 +21,7 @@ class Zed():
         # Initialize the ZED camera
         self.zed = sl.Camera()
         self.init_params = sl.InitParameters(input_t=self.input_type)
-        self.init_params.camera_resolution = sl.RESOLUTION.HD720
+        self.init_params.camera_resolution = sl.RESOLUTION.HD1080
         self.init_params.camera_fps = 30
         self.init_params.depth_mode = sl.DEPTH_MODE.ULTRA
         self.init_params.coordinate_units = sl.UNIT.METER
@@ -41,8 +41,8 @@ class Zed():
         self.runtime_parameters = sl.RuntimeParameters()
         self.runtime_parameters.sensing_mode = sl.SENSING_MODE.FILL  # Use FILL sensing mode
         # Setting the depth confidence parameters
-        self.runtime_parameters.confidence_threshold = 100
-        self.runtime_parameters.textureness_confidence_threshold = 100
+        self.runtime_parameters.confidence_threshold = 90
+        self.runtime_parameters.textureness_confidence_threshold = 90
 
         # Get Camera Calibration Parameters
         self.camera_params = self.zed.get_camera_information().calibration_parameters.left_cam
@@ -57,8 +57,8 @@ class Zed():
         # declare image, depth, point cloud
         self.image = sl.Mat()
         self.depth = sl.Mat()
-        self.Z_depth = sl.Mat()
         self.point_cloud = sl.Mat()
+        self.confidence_map = sl.Mat()
 
     def print_information(self):
         print("Resolution: {0}, {1}.".format(round(self.zed.get_camera_information().camera_resolution.width, 2), self.zed.get_camera_information().camera_resolution.height))
@@ -75,6 +75,8 @@ class Zed():
         self.zed.retrieve_image(self.depth, sl.VIEW.DEPTH)
         # Retrieve colored point cloud. Point cloud is aligned on the left image.
         self.zed.retrieve_measure(self.point_cloud, sl.MEASURE.XYZRGBA, sl.MEM.CPU)
+        # Retrieve confidence map.
+        self.zed.retrieve_measure(self.confidence_map, sl.MEASURE.CONFIDENCE, sl.MEM.CPU)
 
         # convert zed image to numpy array
         self.img = self.image.get_data()

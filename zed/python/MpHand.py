@@ -72,7 +72,7 @@ class HandTracking():
                         # Use wrist position as starting point to project 2D landmarks into 3D space
                         for id, lm in enumerate(landmarks.landmark):
                 
-                            print(wrist_position[0], (lm.x - landmark.x), wrist_position[2])
+                            # print(wrist_position[0], (lm.x - landmark.x), wrist_position[2])
                             x_3d = wrist_position[0] + (lm.x - landmark.x) * wrist_position[2]
                             
                             y_3d = wrist_position[1] + (lm.y - landmark.y) * wrist_position[2]
@@ -80,23 +80,25 @@ class HandTracking():
                             hand_landmarks_3d = [x_3d, y_3d, z_3d]
                 
                             data.append(hand_landmarks_3d)
-
-
     
         # Convert the data to a numpy array
         data = np.array(data)
-        print(data.shape)
+        if data.shape != (21,3):
+            # print without newline
+            sys.stdout.write("\rNot all landmarks detected")
+            sys.stdout.flush()
+
+        else:
+            sys.stdout.write("\rAll 21 landmarks detected")
+            sys.stdout.flush()
+
+ 
 
         return data
 
-
-
-
-
             
-                    
     
-    def displayFPS(self, cap, img):
+    def displayFPS(self, img):
         # Set the time for this frame to the current time.
         self.time2 = time.time()
         # Check if the difference between the previous and this frame time > 0 to avoid division by zero.
@@ -118,9 +120,9 @@ class HandTracking():
         if self.results.multi_hand_landmarks:
             # Clear the plot and add new data
             ax.clear()
-            ax.set_xlim3d(-0.5, 0.5)
-            ax.set_ylim3d(-0.5, 0.5)
-            ax.set_zlim3d(-0.5, 0.5)
+            ax.set_xlim3d(-0.2, 0.2)
+            ax.set_ylim3d(-0.2, 0.2)
+            ax.set_zlim3d(0.2, 1.0)
             ax.scatter3D(*zip(*data))
 
      
