@@ -27,8 +27,6 @@ class HandTracking():
         self.results = self.hands.process(img)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-
-
         if self.results.multi_hand_landmarks:
             for hand_landmarks in self.results.multi_hand_landmarks:
                 self.mp_draw.draw_landmarks(
@@ -55,45 +53,8 @@ class HandTracking():
         data = np.array(data)
         return data
             
-
-    
-    def displayFPS(self, cap, img):
-        # Set the time for this frame to the current time.
-        self.time2 = time.time()
-        # Check if the difference between the previous and this frame time > 0 to avoid division by zero.
-        if (self.time2 - self.time1) > 0:
-        
-            # Calculate the number of frames per second.
-            frames_per_second = 1.0 / (self.time2 - self.time1)
-            
-            # Write the calculated number of frames per second on the frame. 
-            cv2.putText(img, 'FPS: {}'.format(int(frames_per_second)), (10, 30),cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 3)
-            self.time1 = self.time2
-        
-        return img
     
 
-    def plot(self,ax,plt,data):
-        # Create 3D plot
-
-        if self.results.multi_hand_landmarks:
-            # Clear the plot and add new data
-            ax.clear()
-            ax.set_xlim3d(-0.5, 0.5)
-            ax.set_ylim3d(-0.5, 0.5)
-            ax.set_zlim3d(-0.5, 0.5)
-            ax.scatter3D(*zip(*data))
-
-     
-            edges = [(1,2),(2,3),(3,4),(0,5),(5,6),(5,9),(1,0),(6,7),(7,8),(0,9),(9,10),(10,11),(11,12),(9,13),(13,14),(14,15),(15,16),(13,17),(17,18),(18,19),(19,20),(0,17)]
-
-            for edge in edges:
-                ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
-      
-            # Draw the plot
-            plt.draw()
-            plt.pause(0.0001)
-    
 def main():
     cap = cv2.VideoCapture(0)
     cap.set(3,1280)
