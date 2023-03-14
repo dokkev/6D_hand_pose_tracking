@@ -4,15 +4,16 @@ import pyzed.sl as sl
 import numpy as np
 
 class Zed():
-    def __init__(self):
+    def __init__(self,filename=None,depth_confidence=100):
 
+        print("Bringing Up ZED CAMERA Information...")
         # Decide if SVO or Live
-        if len(sys.argv) != 2:
+        if filename is None:
             print("Using Live stream from ZED camera")
             self.input_type = sl.InputType()
             self.svo_mode = False
         else:
-            filepath = sys.argv[1]
+            filepath = filename
             print("Reading SVO file: {0}".format(filepath))
             self.input_type = sl.InputType()
             self.input_type.set_from_svo_file(filepath)
@@ -21,7 +22,7 @@ class Zed():
         # Initialize the ZED camera
         self.zed = sl.Camera()
         self.init_params = sl.InitParameters(input_t=self.input_type)
-        self.init_params.camera_resolution = sl.RESOLUTION.HD1080
+        self.init_params.camera_resolution = sl.RESOLUTION.HD720
         self.init_params.camera_fps = 30
         self.init_params.depth_mode = sl.DEPTH_MODE.ULTRA
         self.init_params.coordinate_units = sl.UNIT.METER
@@ -34,6 +35,7 @@ class Zed():
         err = self.zed.open(self.init_params)
         if err != sl.ERROR_CODE.SUCCESS :
             print(repr(err))
+            print("If using SVO, check if the path is correct")
             self.zed.close()
             exit(1)
 
@@ -41,8 +43,8 @@ class Zed():
         self.runtime_parameters = sl.RuntimeParameters()
         self.runtime_parameters.sensing_mode = sl.SENSING_MODE.FILL  # Use FILL sensing mode
         # Setting the depth confidence parameters
-        self.runtime_parameters.confidence_threshold = 90
-        self.runtime_parameters.textureness_confidence_threshold = 90
+        self.runtime_parameters.confidence_threshold = depth_confidence
+        self.runtime_parameters.textureness_confidence_threshold = depth_confidence
 
         # Get Camera Calibration Parameters
         self.camera_params = self.zed.get_camera_information().calibration_parameters.left_cam

@@ -53,6 +53,7 @@ class HandTracking():
         data = []
         if self.results.multi_hand_landmarks:
              for landmarks in self.results.multi_hand_landmarks:
+
                 for id, landmark in enumerate(landmarks.landmark):
                     # Find the pixel coordinates of the wrist
                     if id == 0:
@@ -76,10 +77,16 @@ class HandTracking():
                             x_3d = wrist_position[0] + (lm.x - landmark.x) * wrist_position[2]
                             
                             y_3d = wrist_position[1] + (lm.y - landmark.y) * wrist_position[2]
-                            z_3d = wrist_position[2]
+                            z_3d = wrist_position[2] + (lm.z - landmark.z) * wrist_position[2]
                             hand_landmarks_3d = [x_3d, y_3d, z_3d]
                 
                             data.append(hand_landmarks_3d)
+
+               
+
+                    data.append(hand_landmarks_3d)
+
+
     
         # Convert the data to a numpy array
         data = np.array(data)
@@ -95,6 +102,29 @@ class HandTracking():
  
 
         return data
+    
+    def calculate_orientation(self,hand_landmarks_3d):
+        # Get the 3D positions of landmarks 0, 5, and 17
+        wrist = hand_landmarks_3d[0]
+        index = hand_landmarks_3d[5]
+        pinky = hand_landmarks_3d[17]
+
+        # Compute the vectors between the landmarks
+        v1 = np.subtract(index, wrist)
+        v2 = np.subtract(pinky, wrist)
+
+        # Compute the normal vector to the plane defined by the landmarks
+        normal = np.cross(v1, v2)
+        normal /= np.linalg.norm(normal)
+
+        # Compute the yaw, pitch, and roll angles based on the orientation of the normal vector
+        yaw = np.arctan2(normal[1], normal[0])
+        pitch = np.arctan2(-normal[2], np.sqrt(normal[0]**2 + normal[1]**2))
+        roll = np.arctan2(np.sin(yaw)*v2[0]-np.cos(yaw)*v2[1], np.cos(yaw)*v1[1]-np.sin(yaw)*v1[0])
+
+        # Convert angles to degrees and return
+        
+        return np.degrees(yaw), np.degrees(pitch), np.degrees(roll)
 
             
     
@@ -120,8 +150,8 @@ class HandTracking():
         if self.results.multi_hand_landmarks:
             # Clear the plot and add new data
             ax.clear()
-            ax.set_xlim3d(-0.2, 0.2)
-            ax.set_ylim3d(-0.2, 0.2)
+            ax.set_xlim3d(-0.1, 0.1)
+            ax.set_ylim3d(-0.1, 0.1)
             ax.set_zlim3d(0.2, 1.0)
             ax.scatter3D(*zip(*data))
 

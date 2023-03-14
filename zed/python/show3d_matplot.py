@@ -12,10 +12,17 @@ from MpHand import HandTracking
 
 def main():
 
+    if len(sys.argv) == 2:
+        print("Camera Mode: SVO")
+        filename = sys.argv[1]
+    else:
+        print("Camera Mode: Live Streaming")
+        filename = None
+        
     # bring detector
     detector = HandTracking()
     # bring zed
-    cam = Zed()
+    cam = Zed(filename)
     
     # print camera information
     cam.print_information()
@@ -23,7 +30,7 @@ def main():
 
     # 3d plot
     # Create 3D plot
-    plot = True
+    plot = False
     if plot == True:
         fig = plt.figure()
         plt.ion()
