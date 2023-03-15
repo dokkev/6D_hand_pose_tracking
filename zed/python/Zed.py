@@ -71,10 +71,10 @@ class Zed():
             print("Frame count: {0}.\n".format(self.zed.get_svo_number_of_frames())) 
 
     def get_image(self):
-        # Retrieve left image
+        # Retrieve left rectified image
         self.zed.retrieve_image(self.image, sl.VIEW.LEFT)
         # Retrieve depth map. Depth is aligned on the left image
-        self.zed.retrieve_image(self.depth, sl.VIEW.DEPTH)
+        self.zed.retrieve_image(self.depth, sl.VIEW.CONFIDENCE)
         # Retrieve colored point cloud. Point cloud is aligned on the left image.
         self.zed.retrieve_measure(self.point_cloud, sl.MEASURE.XYZRGBA, sl.MEM.CPU)
         # Retrieve confidence map.

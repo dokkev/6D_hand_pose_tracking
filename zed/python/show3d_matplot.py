@@ -30,7 +30,7 @@ def main():
 
     # 3d plot
     # Create 3D plot
-    plot = False
+    plot = True
     if plot == True:
         fig = plt.figure()
         plt.ion()

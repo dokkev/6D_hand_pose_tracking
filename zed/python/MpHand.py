@@ -21,13 +21,13 @@ class HandTracking():
         self.wrist = []
 
     def findHands(self, img):
-      
+        
+
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # flip the image horizontally for a selfie-view display.
         # img = cv2.flip(img, 1)
         self.results = self.hands.process(img)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
 
 
         if self.results.multi_hand_landmarks:
@@ -49,45 +49,36 @@ class HandTracking():
         cx = camera_params.cx  # X-coordinate of the principal point
         cy = camera_params.cy  # Y-coordinate of the principal point
 
-
         data = []
         if self.results.multi_hand_landmarks:
              for landmarks in self.results.multi_hand_landmarks:
-
                 for id, landmark in enumerate(landmarks.landmark):
+                    
                     # Find the pixel coordinates of the wrist
                     if id == 0:
                         h, w, _ = img.shape
-                        cx, cy = int(landmark.x * w), int(landmark.y * h)
+                        wrist_landmark_coordinate = [landmark.x, landmark.y, landmark.z]
+                        X, Y = int(landmark.x * w), int(landmark.y * h)
+
 
                         # circle cx, cy
-                        cv2.circle(img, (cx, cy), 10, (0, 0, 255), -1)
+                        cv2.circle(img, (X, Y), 10, (0, 0, 255), -1)
 
                         # Use ZED point cloud to estimate 3D position of wrist
                         try:
-                            err, point_cloud_value = pcl.get_value(cx, cy)
+                            err, point_cloud_value = pcl.get_value(X, Y)
                             wrist_position = [point_cloud_value[0], point_cloud_value[1], point_cloud_value[2]]
                         except:
                             continue
 
-                        # Use wrist position as starting point to project 2D landmarks into 3D space
-                        for id, lm in enumerate(landmarks.landmark):
-                
-                            # print(wrist_position[0], (lm.x - landmark.x), wrist_position[2])
-                            x_3d = wrist_position[0] + (lm.x - landmark.x) * wrist_position[2]
-                            
-                            y_3d = wrist_position[1] + (lm.y - landmark.y) * wrist_position[2]
-                            z_3d = wrist_position[2] + (lm.z - landmark.z) * wrist_position[2]
-                            hand_landmarks_3d = [x_3d, y_3d, z_3d]
-                
-                            data.append(hand_landmarks_3d)
-
-               
-
-                    data.append(hand_landmarks_3d)
-
-
-    
+                    x_3d = wrist_position[0] + (landmark.x*w - wrist_landmark_coordinate[0]*w - cx) * wrist_position[2] / fx
+                    y_3d = wrist_position[1] + (landmark.y*h - wrist_landmark_coordinate[1]*w - cy) * wrist_position[2] / fy
+                    z_3d = wrist_position[2] + (landmark.z - wrist_landmark_coordinate[2]) * wrist_position[2]
+                    hand_landmarks_3d = [x_3d, y_3d, z_3d]
+                    print(hand_landmarks_3d)
+                    # append the 3D position of each 3D landmark 
+                    data.append(hand_landmarks_3d) 
+   
         # Convert the data to a numpy array
         data = np.array(data)
         if data.shape != (21,3):
@@ -98,8 +89,6 @@ class HandTracking():
         else:
             sys.stdout.write("\rAll 21 landmarks detected")
             sys.stdout.flush()
-
- 
 
         return data
     
@@ -150,8 +139,8 @@ class HandTracking():
         if self.results.multi_hand_landmarks:
             # Clear the plot and add new data
             ax.clear()
-            ax.set_xlim3d(-0.1, 0.1)
-            ax.set_ylim3d(-0.1, 0.1)
+            ax.set_xlim3d(-0.5, 0.1)
+            ax.set_ylim3d(-0.5, 0.1)
             ax.set_zlim3d(0.2, 1.0)
             ax.scatter3D(*zip(*data))
 
