@@ -80,7 +80,7 @@ class HandTracking():
    
         # Convert the data to a numpy array
         data = np.array(data)
-        
+      
         if data.shape != (21,3):
             # print without newline
             sys.stdout.write("\rNot all landmarks detected")
@@ -90,8 +90,8 @@ class HandTracking():
         else:
             sys.stdout.write("\rAll 21 landmarks detected")
             sys.stdout.flush()
-            orientation = self.calculate_orientation(data)
-            print(orientation)
+            
+      
 
             
             
@@ -99,6 +99,9 @@ class HandTracking():
         return data
     
     def calculate_orientation(self,hand_landmarks_3d):
+        if hand_landmarks_3d.shape != (21,3):
+            return None
+        
         # Get the 3D positions of landmarks 0, 5, and 17
         wrist = hand_landmarks_3d[0]
         index = hand_landmarks_3d[5]
@@ -117,11 +120,28 @@ class HandTracking():
         pitch = np.arctan2(-normal[2], np.sqrt(normal[0]**2 + normal[1]**2))
         roll = np.arctan2(np.sin(yaw)*v2[0]-np.cos(yaw)*v2[1], np.cos(yaw)*v1[1]-np.sin(yaw)*v1[0])
 
+        self.orientation = np.array([yaw, pitch, roll])
+
         # Convert angles to degrees and return
         
         return np.degrees(yaw), np.degrees(pitch), np.degrees(roll)
 
-            
+    def calculate_centroid(self,hand_landmarks_3d):
+        if hand_landmarks_3d.shape != (21,3):
+            return None
+        # Get the 3D positions of landmarks 0, 5, and 17
+        
+        wrist = hand_landmarks_3d[0]
+        index = hand_landmarks_3d[5]
+        pinky = hand_landmarks_3d[17]
+
+        # Compute a middle point of three landmarks
+        centroid = (wrist + index + pinky)/3
+
+        return centroid
+
+
+      
     
     def displayFPS(self, img):
         # Set the time for this frame to the current time.
@@ -149,6 +169,8 @@ class HandTracking():
             ax.set_ylim3d(-0.5, 0.1)
             ax.set_zlim3d(0.2, 1.0)
             ax.scatter3D(*zip(*data))
+            ax.scatter3D(*zip(*self.centroid), color='red')
+
 
      
             edges = [(1,2),(2,3),(3,4),(0,5),(5,6),(5,9),(1,0),(6,7),(7,8),(0,9),(9,10),(10,11),(11,12),(9,13),(13,14),(14,15),(15,16),(13,17),(17,18),(18,19),(19,20),(0,17)]
