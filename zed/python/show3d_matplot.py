@@ -52,7 +52,7 @@ def main():
             img = detector.findHands(img)
             # find position
             data = detector.findpostion(depth_img, pcl,camera_params)
-
+   
 
             # half size images
             img = cv2.resize(img, (0, 0), None, 0.5, 0.5)

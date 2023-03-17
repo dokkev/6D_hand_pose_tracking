@@ -75,20 +75,26 @@ class HandTracking():
                     y_3d = wrist_position[1] + (landmark.y*h - wrist_landmark_coordinate[1]*w - cy) * wrist_position[2] / fy
                     z_3d = wrist_position[2] + (landmark.z - wrist_landmark_coordinate[2]) * wrist_position[2]
                     hand_landmarks_3d = [x_3d, y_3d, z_3d]
-                    print(hand_landmarks_3d)
                     # append the 3D position of each 3D landmark 
                     data.append(hand_landmarks_3d) 
    
         # Convert the data to a numpy array
         data = np.array(data)
+        
         if data.shape != (21,3):
             # print without newline
             sys.stdout.write("\rNot all landmarks detected")
             sys.stdout.flush()
+            
 
         else:
             sys.stdout.write("\rAll 21 landmarks detected")
             sys.stdout.flush()
+            orientation = self.calculate_orientation(data)
+            print(orientation)
+
+            
+            
 
         return data
     
