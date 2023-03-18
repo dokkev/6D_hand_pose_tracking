@@ -1,13 +1,12 @@
-import cv2
-import sys
+import os, sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import mediapipe as mp
-import time
+import cv2
 import pyzed.sl as sl
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from Zed import Zed
-from MpHand import HandTracking
+from HandTrackingModule.HandTracking import HandTracking
+from HandTrackingModule.Zed import Zed
 
 
 def main():

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-    
 class HandTracking():
     def __init__(self):
         self.mp_hands = mp.solutions.hands
@@ -93,9 +92,6 @@ class HandTracking():
             
       
 
-            
-            
-
         return data
     
     def calculate_orientation(self,hand_landmarks_3d):
@@ -140,7 +136,17 @@ class HandTracking():
 
         return centroid
 
+    def findNormalizedPosition(self):
+        data = []
+        # print(self.results.multi_handedness)
+        if self.results.multi_hand_landmarks:
+            # print(self.results.multi_hand_landmarks)
+            for hand_landmarks in self.results.multi_hand_landmarks:
+                for id, lm in enumerate(hand_landmarks.landmark):
+                    data.append([lm.x, lm.y, lm.z])
 
+        data = np.array(data)
+        return data
       
     
     def displayFPS(self, img):
@@ -159,20 +165,22 @@ class HandTracking():
         return img
     
 
-    def plot(self,ax,plt,data):
+    def plot(self,ax,plt,data,xlim=(-0.5, 0.1),ylim=(-0.5, 0.1),zlim=(0.2, 1.0)):
         # Create 3D plot
 
         if self.results.multi_hand_landmarks:
             # Clear the plot and add new data
             ax.clear()
-            ax.set_xlim3d(-0.5, 0.1)
-            ax.set_ylim3d(-0.5, 0.1)
-            ax.set_zlim3d(0.2, 1.0)
+            
+            # auto scale the plot
+            # ax.autoscale(enable=True, axis='both', tight=None)
+
+            ax.set_xlim3d(xlim)
+            ax.set_ylim3d(ylim)
+            ax.set_zlim3d(zlim)
             ax.scatter3D(*zip(*data))
-            ax.scatter3D(*zip(*self.centroid), color='red')
-
-
      
+            #  Connect Landmarks
             edges = [(1,2),(2,3),(3,4),(0,5),(5,6),(5,9),(1,0),(6,7),(7,8),(0,9),(9,10),(10,11),(11,12),(9,13),(13,14),(14,15),(15,16),(13,17),(17,18),(18,19),(19,20),(0,17)]
 
             for edge in edges:

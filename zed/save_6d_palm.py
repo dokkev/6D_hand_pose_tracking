@@ -70,7 +70,7 @@ def main():
             ROLL.append(roll)
 
             df = pd.DataFrame(name_dict)
-            df.to_csv('../results/demo.csv',index=False)
+            df.to_csv('/results/demo.csv',index=False)
 
             # system out frame number without newline
             print(" | Frame count: ",frame, "/",final_frame, end='\r')
@@ -100,7 +100,6 @@ if __name__ == "__main__":
         'Pitch': PITCH,
         'Roll': ROLL
     }
-
 
     # run main
     main()
