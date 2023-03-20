@@ -27,14 +27,29 @@ def main():
             print("Error: No Camera Found")
             break
 
-        img = detector.findHands(img)
-        data = detector.findNormalizedPosition()
+        img= detector.findHands(img)
+        data_left, data_right = detector.findNormalizedPosition()
+        print("left: ",data_left.shape)
+        print("right: ",data_right.shape)
+
+        
 
         if plot == True:
             xlim = (-0.1, 0.8)
             ylim = (-0.1, 0.8)
             zlim = (0, 0.5)
-            detector.plot(ax,plt,data, xlim, ylim, zlim)
+            if data_right.shape == (21,3) and data_left.shape == (21,3):
+                data_plot = np.vstack((data_right,data_left))
+                print()
+            elif data_right.shape == (21,3):
+                data_plot = data_right
+            elif data_left.shape == (21,3):
+                data_plot = data_left
+            else:
+                data_plot = np.array([])
+            detector.plot(ax,plt,data_plot, xlim, ylim, zlim)
+         
+
 
 
         img = detector.displayFPS(img)

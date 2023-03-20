@@ -8,12 +8,12 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 class HandTracking():
-    def __init__(self):
+    def __init__(self, maxHands=2, detectionCon=0.8, trackCon=0.9):
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(static_image_mode=False,
-                                              max_num_hands=1,           
-                                              min_detection_confidence=0.5,   
-                                              min_tracking_confidence=0.5) 
+                                              max_num_hands= maxHands,           
+                                              min_detection_confidence=detectionCon,   
+                                              min_tracking_confidence=trackCon) 
         self.mp_draw = mp.solutions.drawing_utils
         self.mp_styles = mp.solutions.drawing_styles
         self.time1 = time.time()
@@ -30,15 +30,18 @@ class HandTracking():
 
 
         if self.results.multi_hand_landmarks:
-            # print(self.results.multi_handedness)
             for hand_landmarks in self.results.multi_hand_landmarks:
+                handedness = self.results.multi_handedness[self.results.multi_hand_landmarks.index(hand_landmarks)].classification[0].label
+     
                 self.mp_draw.draw_landmarks(
                     img, 
                     hand_landmarks, 
                     self.mp_hands.HAND_CONNECTIONS,
                     self.mp_styles.get_default_hand_landmarks_style(), 
                     self.mp_styles.get_default_hand_connections_style()
-                )        
+                )
+
+            
         return img
 
     
@@ -137,17 +140,24 @@ class HandTracking():
         return centroid
 
     def findNormalizedPosition(self):
-        data = []
-        # print(self.results.multi_handedness)
-        if self.results.multi_hand_landmarks:
-            # print(self.results.multi_hand_landmarks)
-            for hand_landmarks in self.results.multi_hand_landmarks:
-                for id, lm in enumerate(hand_landmarks.landmark):
-                    data.append([lm.x, lm.y, lm.z])
+        left_data = []
+        right_data = []
 
-        data = np.array(data)
-        return data
-      
+        if self.results.multi_hand_landmarks:
+            for landmarks in self.results.multi_hand_landmarks:
+                handedness = self.results.multi_handedness[self.results.multi_hand_landmarks.index(landmarks)].classification[0].index
+                for id, landmark in enumerate(landmarks.landmark):
+                    hand_landmarks_3d = [landmark.x, landmark.y, landmark.z]
+                    # append the 3D position of each 3D landmark 
+                    if handedness == 1:
+                        left_data.append(hand_landmarks_3d)
+                    elif handedness == 0:
+                        right_data.append(hand_landmarks_3d)
+
+        left_data = np.array(left_data)
+        right_data = np.array(right_data)
+
+        return left_data, right_data
     
     def displayFPS(self, img):
         # Set the time for this frame to the current time.
@@ -168,7 +178,8 @@ class HandTracking():
     def plot(self,ax,plt,data,xlim=(-0.5, 0.1),ylim=(-0.5, 0.1),zlim=(0.2, 1.0)):
         # Create 3D plot
 
-        if self.results.multi_hand_landmarks:
+        if data.shape >= (21,3):
+          
             # Clear the plot and add new data
             ax.clear()
             
@@ -180,12 +191,21 @@ class HandTracking():
             ax.set_zlim3d(zlim)
             ax.scatter3D(*zip(*data))
      
-            #  Connect Landmarks
+            #  C
             edges = [(1,2),(2,3),(3,4),(0,5),(5,6),(5,9),(1,0),(6,7),(7,8),(0,9),(9,10),(10,11),(11,12),(9,13),(13,14),(14,15),(15,16),(13,17),(17,18),(18,19),(19,20),(0,17)]
+            edges2 = [(22,23),(23,24),(24,25),(21,26),(26,27),(26,30),(22,21),(27,28),(28,29),(21,30),(30,31),(31,32),(32,33),(30,34),(34,35),(35,36),(36,37),(34,38),(38,39),(39,40),(40,41),(21,38)] 
 
-            for edge in edges:
-                ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
-      
+            if data.shape != (42,3):
+                for edge in edges:
+                    ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
+
+            else:
+                for edge in edges:
+                    ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='red')
+                for edge in edges2:
+                    ax.plot3D(*zip(data[edge[0]], data[edge[1]]), color='blue')
+
+
             # Draw the plot
             plt.draw()
             plt.pause(0.0001)
