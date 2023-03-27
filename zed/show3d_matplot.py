@@ -50,7 +50,7 @@ def main():
             # find hands
             img = detector.findHands(img)
             # find position
-            data = detector.findpostion(depth_img, pcl,camera_params)
+            data_left,data_right = detector.findpostion(depth_img, pcl,camera_params)
    
 
             # half size images
@@ -59,8 +59,16 @@ def main():
 
 
             if plot == True:
-                detector.plot(ax,plt,data)
-
+                if data_right.shape == (21,3) and data_left.shape == (21,3):
+                    data_plot = np.vstack((data_right,data_left))
+                elif data_right.shape == (21,3):
+                    data_plot = data_right
+                elif data_left.shape == (21,3):
+                    data_plot = data_left
+                else:
+                    data_plot = np.array([])
+                detector.plot(ax,plt,data_plot)
+            
             detector.displayFPS(img)
             cv2.imshow("Image", img)
             cv2.imshow("Depth", depth_img)

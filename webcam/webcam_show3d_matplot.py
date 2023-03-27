@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 def main():
     cap = cv2.VideoCapture(0)
+    print("Live Streaming from webcam")
     cap.set(3,1280)
     cap.set(4,960)
 
@@ -23,14 +24,14 @@ def main():
 
     while cap.isOpened():
         success, img = cap.read()
+        
         if not success:
             print("Error: No Camera Found")
             break
 
         img= detector.findHands(img)
-        data_left, data_right = detector.findNormalizedPosition()
-        print("left: ",data_left.shape)
-        print("right: ",data_right.shape)
+        data_left, data_right = detector.findNormalizedPosition(img)
+ 
 
         
 

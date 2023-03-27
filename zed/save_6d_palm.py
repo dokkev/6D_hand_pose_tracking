@@ -1,9 +1,10 @@
 import cv2
-import sys
+import sys,os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import mediapipe as mp
 import numpy as np
-from Zed import Zed
-from MpHand import HandTracking
+from HandTrackingModule.HandTracking import HandTracking
+from HandTrackingModule.Zed import Zed
 import pyzed.sl as sl
 import pandas as pd
 
@@ -27,7 +28,8 @@ def main():
     final_frame = cam.zed.get_svo_number_of_frames()
     camera_params = cam.camera_params
     frame = 0
-    x, y, z, yaw, pitch, roll = 0, 0, 0, 0, 0, 0
+    Lx, Ly, Lz, Lyaw, Lpitch, Lroll = 0, 0, 0, 0, 0, 0
+    Rx, Ry, Rz, Ryaw, Rpitch, Rroll = 0, 0, 0, 0, 0, 0
 
 
     while frame <= final_frame:
@@ -46,59 +48,77 @@ def main():
             # find hands
             img = detector.findHands(img)
             # find handmark positions
-            data = detector.findpostion(depth_img, pcl,camera_params)
+            data_left,data_right = detector.findpostion(depth_img, pcl,camera_params)
 
             # find the orientation of the palm
-            orientaton = detector.calculate_orientation(data)
+            left_orientaton = detector.calculate_orientation(data_left)
             # find the centroid of the palm
-            centroid = detector.calculate_centroid(data)
+            left_centroid = detector.calculate_centroid(data_left)
 
-            if len(data) != 0:
-                x = centroid[0]
-                y = centroid[1]
-                z = centroid[2]
-                yaw = orientaton[0]
-                pitch = orientaton[1]
-                roll = orientaton[2]
+            # find the orientation of the palm
+            right_orientaton = detector.calculate_orientation(data_right)
+            # find the centroid of the palm
+            right_centroid = detector.calculate_centroid(data_right)
+
+            if len(data_left) != 0:
+                lx = left_centroid[0]
+                ly = left_centroid[1]
+                lz = left_centroid[2]
+                lyaw = left_orientaton[0]
+                lpitch = left_orientaton[1]
+                lroll = left_orientaton[2]
+
+            if len(data_right) != 0:
+                rx = right_centroid[0]
+                ry = right_centroid[1]
+                rz = right_centroid[2]
+                ryaw = right_orientaton[0]
+                rpitch = right_orientaton[1]
+                rroll = right_orientaton[2]
 
             F.append(frame)
-            X.append(x)
-            Y.append(y)
-            Z.append(z)
-            YAW.append(yaw)
-            PITCH.append(pitch)
-            ROLL.append(roll)
+            LX.append(lx)
+            LY.append(ly)
+            LZ.append(lz)
+            LYAW.append(lyaw)
+            LPITCH.append(lpitch)
+            LROLL.append(lroll)
+            RX.append(rx)
+            RY.append(ry)
+            RZ.append(rz)
+            RYAW.append(ryaw)
+            RPITCH.append(rpitch)
+            RROLL.append(rroll)
 
             df = pd.DataFrame(name_dict)
-            df.to_csv('/results/demo.csv',index=False)
+            df.to_csv('results/demo.csv',index=False)
 
             # system out frame number without newline
             print(" | Frame count: ",frame, "/",final_frame, end='\r')
 
 
 
-   
 
-
-
-
-
-
-
-
- 
 if __name__ == "__main__":
     #  Initialize lists for Pandas DataFrame
-    F, X, Y, Z, YAW, PITCH, ROLL = [], [], [], [], [], [], []
+    F, RX, RY, RZ, RYAW, RPITCH, RROLL = [], [], [], [], [], [], []
+    LX, LY, LZ, LYAW, LPITCH, LROLL = [], [], [], [], [], [], []
     key = ' '
     name_dict = {
         'Frame': F,
-        'X': X,
-        'Y': Y,
-        'Z': Z,
-        'Yaw': YAW,
-        'Pitch': PITCH,
-        'Roll': ROLL
+        'left X': RX,
+        'left Y': RY,
+        'left Z': RZ,
+        'left Yaw': RYAW,
+        'left Pitch': RPITCH,
+        'left Roll': RROLL,
+        'right X': LX,
+        'right Y': LY,
+        'right Z': LZ,
+        'right Yaw': LYAW,
+        'right Pitch': LPITCH,
+        'right Roll': LROLL,     
+
     }
 
     # run main
