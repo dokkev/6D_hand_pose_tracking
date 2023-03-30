@@ -11,7 +11,7 @@ def main():
     cap = cv2.VideoCapture(0)
     print("Live Streaming from webcam")
     cap.set(3,1280)
-    cap.set(4,960)
+    cap.set(4,720)
 
     detector = ht()
     plot = True
@@ -33,7 +33,7 @@ def main():
         data_left, data_right = detector.findNormalizedPosition(img)
  
 
-        
+    
 
         if plot == True:
             xlim = (-0.1, 0.8)
@@ -50,7 +50,6 @@ def main():
                 data_plot = np.array([])
             detector.plot(ax,plt,data_plot, xlim, ylim, zlim)
          
-
 
 
         img = detector.displayFPS(img)

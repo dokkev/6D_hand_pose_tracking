@@ -141,6 +141,7 @@ class HandTracking():
         left_data = []
         right_data = []
         w, h, _ = img.shape
+
         if self.results.multi_hand_landmarks:
             
             for landmarks in self.results.multi_hand_landmarks:
@@ -148,7 +149,7 @@ class HandTracking():
                 for id, landmark in enumerate(landmarks.landmark):
                     # Find the pixel coordinates of the wrist
                     if id == 0:
-                        X, Y = int(landmark.x * w), int(landmark.y * h)
+                        X, Y = int(landmark.x * h), int(landmark.y * w)
                         # circle X, Y
                         cv2.circle(img, (X, Y), 10, (0, 0, 255), -1)
          
