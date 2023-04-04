@@ -1,3 +1,5 @@
+<img src="img/demo.gif">
+
 # 3D Hand Trakcing with MediaPipe
 Google's [MediaPipe](https://google.github.io/mediapipe/) provides a pose estimation model of images and videos of human hands. Along with its capability of palm detection and hand landmark estimation, this project aims to track 21 joints of human hands in the 3D space in real-time. 
 
