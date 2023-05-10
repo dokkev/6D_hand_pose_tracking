@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 class HandTracking():
-    def __init__(self, maxHands=2, detectionCon=0.8, trackCon=0.9):
+    def __init__(self, maxHands=2, detectionCon=0.2, trackCon=0.9):
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(static_image_mode=False,
                                               max_num_hands= maxHands,           
@@ -97,7 +97,8 @@ class HandTracking():
     
     def calculate_orientation(self,hand_landmarks_3d):
         if hand_landmarks_3d.shape != (21,3):
-            return None
+            zero_array = np.zeros((3,))
+            return  zero_array
         
         # Get the 3D positions of landmarks 0, 5, and 17
         wrist = hand_landmarks_3d[0]
@@ -125,7 +126,8 @@ class HandTracking():
 
     def calculate_centroid(self,hand_landmarks_3d):
         if hand_landmarks_3d.shape != (21,3):
-            return None
+            zero_array = np.zeros((3,))
+            return  zero_array
         # Get the 3D positions of landmarks 0, 5, and 17
         
         wrist = hand_landmarks_3d[0]
@@ -134,6 +136,8 @@ class HandTracking():
 
         # Compute a middle point of three landmarks
         centroid = (wrist + index + pinky)/3
+
+
 
         return centroid
 

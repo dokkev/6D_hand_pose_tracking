@@ -28,8 +28,8 @@ def main():
     final_frame = cam.zed.get_svo_number_of_frames()
     camera_params = cam.camera_params
     frame = 0
-    Lx, Ly, Lz, Lyaw, Lpitch, Lroll = 0, 0, 0, 0, 0, 0
-    Rx, Ry, Rz, Ryaw, Rpitch, Rroll = 0, 0, 0, 0, 0, 0
+    lx, ly, lz, lyaw, lpitch, lroll = 0, 0, 0, 0, 0, 0
+    rx, ry, rz, ryaw, rpitch, rroll = 0, 0, 0, 0, 0, 0
 
 
     while frame <= final_frame:
@@ -49,6 +49,10 @@ def main():
             img = detector.findHands(img)
             # find handmark positions
             data_left,data_right = detector.findpostion(depth_img, pcl,camera_params)
+
+            cv2.imshow("Image", img)
+            cv2.waitKey(1)
+
 
             # find the orientation of the palm
             left_orientaton = detector.calculate_orientation(data_left)
@@ -91,7 +95,8 @@ def main():
             RROLL.append(rroll)
 
             df = pd.DataFrame(name_dict)
-            df.to_csv('results/demo.csv',index=False)
+            csvname = 'results/'+ filename + '.csv'
+            df.to_csv('results/trial2.csv',index=False)
 
             # system out frame number without newline
             print(" | Frame count: ",frame, "/",final_frame, end='\r')
@@ -102,7 +107,7 @@ def main():
 if __name__ == "__main__":
     #  Initialize lists for Pandas DataFrame
     F, RX, RY, RZ, RYAW, RPITCH, RROLL = [], [], [], [], [], [], []
-    LX, LY, LZ, LYAW, LPITCH, LROLL = [], [], [], [], [], [], []
+    LX, LY, LZ, LYAW, LPITCH, LROLL = [], [], [], [], [], []
     key = ' '
     name_dict = {
         'Frame': F,
